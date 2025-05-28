@@ -13,3 +13,9 @@ services:
       - "9698:8081"
     environment:
       - PORT=8081
+  agentbigquery:
+    build: ./agent-bigquery
+    ports:
+      - "9699:8082"
+    environment:
+      - PORT=8082

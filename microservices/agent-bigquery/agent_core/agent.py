@@ -1,16 +1,19 @@
+import datetime
+
 from google.adk.agents import LlmAgent, BaseAgent
 
-from sub_agents.sql_query_understanding_agent.agent import query_understanding_agent
-from sub_agents.sql_generator_agent.agent import query_generation_agent
-from nl2sql.sub_agents.query_review_rewrite_agent.agent import query_review_rewrite_agent
-from nl2sql.sub_agents.query_execution_agent.agent import query_execution_agent
-from nl2sql.tools.initialize_state import initialize_state_var
+from agent_core.tools.init_state import initialize_state_var
+from agent_core.sub_agents.sql_query_understanding_agent.agent import query_understanding_agent
+from agent_core.sub_agents.sql_generator_agent.agent import query_generation_agent
+from agent_core.sub_agents.sql_reviewer_agent.agent import query_review_rewrite_agent
+from agent_core.sub_agents.sql_executor_agent.agent import query_execution_agent
+
 
 from typing import AsyncGenerator
 from typing_extensions import override
 from google.adk.events import Event, EventActions
 from google.adk.agents.invocation_context import InvocationContext
-from google.adk.tools import ToolContext
+
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -38,6 +41,16 @@ class OrchestratorAgent(BaseAgent):
             before_agent_callback=initialize_state_var,
             description="This is a Orchestrator Agent which executes the nl2sql workflow using the sub_agents provided"
         )
+
+    def serialize_dates(self,obj):
+        if isinstance(obj, dict):
+            return {k: self.serialize_dates(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [self.serialize_dates(v) for v in obj]
+        elif isinstance(obj, datetime.date):
+            return obj.isoformat()
+        else:
+            return obj
 
     @override
     async def _run_async_impl(self, ctx: InvocationContext) -> AsyncGenerator[Event, None]:
@@ -80,11 +93,15 @@ class OrchestratorAgent(BaseAgent):
 
         # query execution agent call
         async for event in self.query_execution_agent.run_async(ctx):
+            print(f"DEBUG: Event object type: {type(event)}, Event content: {event}")
+
             logger.info(f"[{self.name}] - {event.model_dump_json(indent=2, exclude_none=True)}")
             yield event
 
         query_execution_output = ctx.session.state['query_execution_output']
         logger.info(f"[{self.name}] - {query_execution_output}")
+        query_execution_output = ctx.session.state.get('query_execution_output')
+        ctx.session.state['query_execution_output'] = self.serialize_dates(query_execution_output)
 
         if query_execution_output is None:
             return

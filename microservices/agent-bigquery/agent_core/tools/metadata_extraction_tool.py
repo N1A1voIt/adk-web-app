@@ -25,7 +25,6 @@ def bigquery_metdata_extraction_tool(PROJECT: str,
         where table_catalog = "{PROJECT}"
         and table_schema = "{DATASET}"
     """
-
     query_job = client.query(query)
     query_list = []
 
