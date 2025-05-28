@@ -1,0 +1,3 @@
+gcloud projects add-iam-policy-binding adk-hackathon-460011 \
+  --member='user:nyavorandrianarisoa@gmail.com' \
+  --role='roles/bigquery.jobUser'
