@@ -1,0 +1,1 @@
+PROMPT = "lorem ipsum dolor sit amet"

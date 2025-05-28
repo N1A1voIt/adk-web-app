@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  agent1:
+    build: ./agent-1
+    ports:
+      - "9697:8080"
+    environment:
+      - PORT=8080
+  agent2:
+    build: ./agent-2
+    ports:
+      - "9698:8081"
+    environment:
+      - PORT=8081
+  agentbigquery:
+    build: ./agent-bigquery
+    ports:
+      - "9699:8082"
+    environment:
+      - PORT=8082
