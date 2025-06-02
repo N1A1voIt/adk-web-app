@@ -160,3 +160,5 @@ cython_debug/
 #.idea/
 .idea
 microservices/agent-bigquery/service-account.json
+/agent-front-end/.vscode
+agent-front-end/package-lock.json
