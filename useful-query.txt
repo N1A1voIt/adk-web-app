@@ -1,0 +1,8 @@
+bq load \
+  --source_format=CSV \
+  --skip_leading_rows=1 \
+  --autodetect \
+  --replace=false \
+  --schema=Date:DATE,Open:FLOAT,High:FLOAT,Low:FLOAT,Close:FLOAT,adj_close:FLOAT,Volume:FLOAT,symbol:STRING \
+  tradingdata.historical_trading_data \
+  gs://historical_data_bucket-1/crypto_and_stock_historical_data.csv
