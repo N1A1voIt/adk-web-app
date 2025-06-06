@@ -162,3 +162,4 @@ cython_debug/
 microservices/agent-bigquery/service-account.json
 /agent-front-end/.vscode
 agent-front-end/package-lock.json
+microservices/agent-market-simulation/service-account.json
