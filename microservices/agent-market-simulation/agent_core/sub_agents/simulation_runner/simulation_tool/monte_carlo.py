@@ -57,7 +57,7 @@ class MonteCarloBacktester:
             df.loc[df['Close'] < df['lower_bollinger_band'], 'Signal'] = 1
             df.loc[df['Close'] > df['upper_bollinger_band'], 'Signal'] = -1
 
-        df['Position'] = df['Signal'].replace(to_replace=0, method='ffill').fillna(0)
+        df['Position'] = df['Signal'].replace(to_replace=0).fillna(0)
         df['Daily Return'] = df['Close'].pct_change()
         df['Strategy Return'] = df['Daily Return'] * df['Position'].shift(1)
         return df

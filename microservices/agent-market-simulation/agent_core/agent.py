@@ -83,8 +83,8 @@ class MarketSimulatorAgent(BaseAgent):
             simulation_output = ctx.session.state['simulation_output']
             logger.info(f"[{self.name}] - {simulation_output}")
 
-        if simulation_output is None or "```json" not in simulation_output:
-            return
+        # if simulation_output is None or "```json" not in simulation_output:
+        #     return
 
         async for event in self.insight_agent.run_async(ctx):
             logger.info(f"[{self.name}] - {event.model_dump_json(indent=2, exclude_none=True)}")
