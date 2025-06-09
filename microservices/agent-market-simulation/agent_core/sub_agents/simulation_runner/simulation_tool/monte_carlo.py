@@ -139,14 +139,15 @@ class MonteCarloBacktester:
 
     def summarize_results(self, results_df):
         return {
-            "average_final_return": f"{results_df['Final Return %'].mean():.2f}%",
+            "Strategy":results_df["Strategy"].iloc[0],
+            "average_final_return": f"{results_df['Predicted Return %'].mean():.2f}%",
             "average_sharpe_ratio": round(results_df['Sharpe Ratio'].mean(), 2),
             "average_max_drawdown": f"{results_df['Max Drawdown %'].mean():.2f}%"
         }
 
-    def run_multiple_strategies(self, strategies, scenario=None, n_simulations=100, window_size=252):
+    def run_multiple_strategies(self, strategies, scenario=None,next_days = 30, n_simulations=100, window_size=252):
         summaries = []
         for strategy in strategies:
-            results = self.monte_carlo_future_simulation(strategy, scenario, n_simulations, window_size)
+            results = self.monte_carlo_future_simulation(strategy, scenario, n_simulations, window_size,next_days)
             summaries.append(self.summarize_results(results))
         return summaries

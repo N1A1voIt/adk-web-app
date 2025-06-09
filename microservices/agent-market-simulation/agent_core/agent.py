@@ -12,6 +12,7 @@ from google.adk.agents.invocation_context import InvocationContext
 
 import logging
 
+from agent_core.sub_agents.simulation_runner.agent import simulation_agent
 # from agent_core.sub_agents.scenarioagent.agent import scenario_agent
 from agent_core.sub_agents.strategy_agent.agent import language_processing_agent, strategy_agent
 from agent_core.tools.init_state import initialize_state_var
@@ -23,22 +24,21 @@ USER_ID = "research_user_01"
 SESSION_ID = "parallel_research_session"
 GEMINI_MODEL = "gemini-2.0-flash"
 class MarketSimulatorAgent(BaseAgent):
-    # query_understanding_agent: LlmAgent
-    # query_generation_agent: LlmAgent
-    # query_review_rewrite_agent: LlmAgent
-    # query_execution_agent: LlmAgent$
     language_processing_agent:LlmAgent
     strategy_agent:LlmAgent
+    simulation_agent:LlmAgent
 
     def __init__(self,
                      name: str,
                      language_processing_agent:LlmAgent,
                      strategy_agent:LlmAgent,
+                    simulation_agent: LlmAgent
                  ):
         super().__init__(
             name=name,
             language_processing_agent=language_processing_agent,
             strategy_agent=strategy_agent,
+            simulation_agent=simulation_agent,
             before_agent_callback=initialize_state_var,
             description="This is a Orchestrator Agent which executes the simulation workflows using the sub_agents provided"
         )
@@ -54,7 +54,7 @@ class MarketSimulatorAgent(BaseAgent):
         if "lp_output" in ctx.session.state:
             lp_output = ctx.session.state['lp_output']
             logger.info(f"[{self.name}] - {lp_output}")
-        print("LP OUTPUUUUUT:"+lp_output)
+
         if lp_output is None or "```json" not in lp_output:
             return
         ctx.session.state['lp_output'] = ctx.session.state['lp_output'].replace("```json", "").replace("```","")
@@ -70,9 +70,24 @@ class MarketSimulatorAgent(BaseAgent):
 
         if strategy_output is None or "```json" not in strategy_output:
             return
+
+        async for event in self.simulation_agent.run_async(ctx):
+            logger.info(f"[{self.name}] - {event.model_dump_json(indent=2, exclude_none=True)}")
+            yield event
+
+        simulation_output = ""
+        if "simulation_output" in ctx.session.state:
+            simulation_output = ctx.session.state['simulation_output']
+            logger.info(f"[{self.name}] - {simulation_output}")
+
+        if simulation_output is None or "```json" not in simulation_output:
+            return
+
+
+
         # ctx.session.state['output'] = "Hello World"
 
-market_simulator_agent = MarketSimulatorAgent(name="Agent",language_processing_agent=language_processing_agent,strategy_agent=strategy_agent)
+market_simulator_agent = MarketSimulatorAgent(name="Agent",language_processing_agent=language_processing_agent,strategy_agent=strategy_agent,simulation_agent=simulation_agent)
 root_agent = market_simulator_agent
 #
 #
